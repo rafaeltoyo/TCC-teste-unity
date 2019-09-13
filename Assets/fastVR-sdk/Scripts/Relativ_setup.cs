@@ -3,46 +3,56 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO.Ports;
 
-public class Relativ_setup {
+public class Relativ_setup
+{
+    private int baudRate;
 
-	public string portName;
+    private int readTimeout;
 
-	public int baudRate;
+    public Relativ_setup(int baudRate, int readTimeout)
+    {
+        this.baudRate = baudRate;
+        this.readTimeout = readTimeout;
+    }
 
-	public int ReadTimeout;
+    public string findPort()
+    {
+        SerialPort tmpSerialPort;
+        string portName = "";
 
-	public string getPort() {
-		SerialPort tmp_serialPort;
-		foreach (string port in SerialPort.GetPortNames()) {
-			tmp_serialPort = new SerialPort(port);
-			tmp_serialPort.BaudRate = getBaudRate();
-			tmp_serialPort.ReadTimeout = getTimeout();
+        foreach (string port in SerialPort.GetPortNames())
+        {
 
-            if (tmp_serialPort.IsOpen == false) {
-			    try {
-				    //open serial port
-				    tmp_serialPort.Open ();
-				    string dataComingFromRelativ = tmp_serialPort.ReadLine();
+            tmpSerialPort = new SerialPort(port);
+            tmpSerialPort.BaudRate = 250000;
+            tmpSerialPort.ReadTimeout = 50;
 
-				    if (dataComingFromRelativ != "") {
-					    this.portName = port;
-					    tmp_serialPort.Close();
-				    } else {
-					    tmp_serialPort.Close ();
-				    }
-			    }
-                catch(System.Exception e) {
-			    }
-			}
-		}
-		return this.portName;
-	}
+            if (tmpSerialPort.IsOpen == false)
+            {
 
-	public int getBaudRate() {
-		return 250000;
-	}
+                try
+                {
+                    //open serial port
+                    tmpSerialPort.Open();
+                    string dataComingFromRelativ = tmpSerialPort.ReadLine();
 
-	public int getTimeout() {
-		return 500;
-	}
+                    if (dataComingFromRelativ != "")
+                    {
+                        portName = port;
+                    }
+
+                }
+                catch
+                {
+                    // ...
+                }
+                finally
+                {
+                    tmpSerialPort.Close();
+                    tmpSerialPort = null;
+                }
+            }
+        }
+        return portName;
+    }
 }
